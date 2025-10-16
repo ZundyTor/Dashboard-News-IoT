@@ -1,0 +1,29 @@
+# Credenciales y configuración sensible
+include/config.h
+
+# Archivos de compilación de PlatformIO
+.pio/
+.vscode/
+.clang_complete
+.gcc-flags.json
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de respaldo
+*.bak
+*.tmp
+*~
+
+# Logs
+*.log
+
+# Archivos de IDE
+*.swp
+*.swo
+.idea/
+
+# Build artifacts
+build/
+dist/
