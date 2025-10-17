@@ -210,6 +210,36 @@ const char* TALKBACK_API_KEY = "TU_TALKBACK_KEY";
 
 ---
 
+## 📊 Explicación de los Fields en ThingSpeak
+
+Cada uno de los siguientes campos ("fields") representa una variable clave para el monitoreo y control del sistema IoT. Así puedes interpretar las gráficas o valores en el dashboard de ThingSpeak:
+
+| **Field**              | **Descripción**                                                                                                                                                 | **Ejemplo**  |
+|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| **uptime_seconds**     | 🕒 **Tiempo total encendido** del ESP32 desde el último reinicio, en segundos. Útil para saber la estabilidad y detectar reinicios no deseados.                  | 3600        |
+| **wifi_rssi**          | 📶 **Intensidad de señal WiFi** en dBm. Entre -30 (excelente) y -90 (muy mala). Si baja de -70, es probable que haya desconexiones.                             | -45         |
+| **free_memory**        | 💾 **Memoria RAM libre** en bytes. Permite identificar fugas de memoria o cuellos de botella en el software.                                                    | 245000      |
+| **total_requests**     | 🔄 **Total de solicitudes** hechas a NewsAPI desde el último reinicio. Permite monitorear frecuencia de uso y posibles excesos respecto al límite diario.        | 50          |
+| **successful_requests**| ✅ **Solicitudes exitosas** a NewsAPI. Útil para calcular tasa de éxito y la calidad de la conexión/API.                                                        | 48          |
+| **failed_requests**    | ❌ **Solicitudes fallidas** a NewsAPI (errores de red, límites, API key inválida, etc). Ayuda a detectar problemas antes de que afecten al usuario.              | 2           |
+| **current_category**   | 🏷️ **Categoría de noticias actual** (valor numérico):<br>0=technology, 1=business, 2=sports, 3=entertainment, 4=health, 5=science, 6=general.                  | 0           |
+| **device_status**      | ⚙️ **Estado general del dispositivo**:<br>1=OK (funcionando), 0=Error (sin conexión, sin noticias, etc).                                                        | 1           |
+
+---
+
+### 📈 ¿Cómo interpretar las gráficas del dashboard de ThingSpeak?
+
+- **uptime_seconds**: Si sube continuamente, el sistema está estable. Si ves caídas a 0, hubo un reinicio.
+- **wifi_rssi**: Si baja de -70 dBm, la señal es débil; si se mantiene estable, la conexión es confiable.
+- **free_memory**: Debe ser relativamente constante; si baja mucho, puede haber fuga de memoria.
+- **total_requests / successful_requests / failed_requests**: Te permiten calcular la tasa de éxito y anticipar problemas de red o API.
+- **current_category**: Útil para ver cuándo y con qué comandos cambiaste el tipo de noticias.
+- **device_status**: Si ves un 0, revisa el ESP32; puede estar sin WiFi o con error de API.
+
+---
+
+> **Tip**: ¡Estas métricas no solo ayudan a monitorear el sistema, sino también a anticipar y diagnosticar problemas antes de que el usuario los perciba!
+
 # 🧩 Diagrama de arquitectura del sistema
 
 ```
