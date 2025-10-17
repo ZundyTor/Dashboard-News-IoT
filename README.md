@@ -2,34 +2,48 @@
 
 Sistema IoT que integra un ESP32 con display OLED SSD1306 (SPI), consumo de APIs públicas (NewsAPI) y servicios en la nube (ThingSpeak + TalkBack) para visualizar titulares y controlar parámetros de forma remota. Proyecto desarrollado paso a paso, con pruebas en cada fase y manejo robusto de errores.
 
-Estado: Operativo
-Plataforma: ESP32 (ESP32-D0WD-V3) + PlatformIO (VS Code)
-Lenguaje: C++
+---
+
+## 🟦 Tabla de Contenidos
+
+- [📖 Descripción del proyecto y objetivos](#-descripción-del-proyecto-y-objetivos)
+- [🔩 Lista de componentes y conexiones](#-lista-de-componentes-y-conexiones)
+- [☁️ Servicios en la nube utilizados](#-servicios-en-la-nube-utilizados)
+- [🌐 APIs externas integradas](#-apis-externas-integradas)
+- [🚦 Instrucciones de instalación paso a paso](#-instrucciones-de-instalación-paso-a-paso)
+- [🔐 Configuración de credenciales](#-configuración-de-credenciales)
+- [🕹️ Guía de uso del sistema completo](#-guía-de-uso-del-sistema-completo)
+- [🧩 Diagrama de arquitectura del sistema](#-diagrama-de-arquitectura-del-sistema)
+- [🐞 Problemas encontrados y soluciones](#-problemas-encontrados-y-soluciones)
+- [🚀 Mejoras futuras identificadas](#-mejoras-futuras-identificadas)
+- [⚙️ Elementos Técnicos Obligatorios](#️-elementos-técnicos-obligatorios)
+- [📦 Estructura recomendada del repositorio](#-estructura-recomendada-del-repositorio)
 
 ---
 
-## Descripción del proyecto y objetivos
+# 📖 Descripción del proyecto y objetivos
 
-El proyecto implementa un Dashboard de Noticias en un ESP32 con pantalla OLED. Obtiene titulares desde NewsAPI y los muestra en el display rotando periódicamente. Envía telemetría a ThingSpeak (uptime, RSSI, memoria, estadísticas de requests) y recibe comandos desde TalkBack para cambiar categoría/país, intervalo de actualización, forzar actualización o reiniciar el dispositivo.
+**Dashboard de Noticias IoT**: Visualiza titulares en tiempo real en un ESP32 + OLED, consume APIs públicas (NewsAPI), envía telemetría a la nube (ThingSpeak), y permite control remoto (TalkBack).
 
-Objetivo general:
-- Desarrollar un sistema IoT completo que integre ESP32 + OLED y servicios en la nube, demostrando habilidades en IoT, APIs REST y computación en la nube.
+✅ **Objetivo:** Demostrar integración IoT + Cloud + APIs + control remoto, con código robusto y documentado.
 
-Objetivos específicos:
-- Implementar dispositivo IoT con ESP32 y display SSD1306 (SPI).
-- Integrar servicios web externos (NewsAPI).
-- Desplegar servicios en la nube (ThingSpeak) para recepción/envío de datos.
-- Configurar comunicación bidireccional: telemetría y control remoto (TalkBack).
-- Documentar el proceso completo con diagramas, guías y troubleshooting.
+**Metas alcanzadas:**
+- Hardware confiable y display interactivo
+- Consumo seguro de APIs externas
+- Sincronización de datos y control con la nube
+- Documentación y visuales para onboarding y troubleshooting
 
 ---
 
-## Lista de componentes y conexiones
+# 🔩 Lista de componentes y conexiones
 
-Hardware:
-- ESP32 DevKit (ESP32-D0WD-V3).
-- Display OLED SSD1306 128x64 (versión SPI de 7 pines).
-- Cable USB (programación/alimentación).
+## 🛠️ Hardware
+
+| Componente       | Descripción                      | Cantidad |
+|------------------|----------------------------------|----------|
+| ESP32 DevKit     | ESP32-D0WD-V3, WiFi, 240 MHz     | 1        |
+| OLED SSD1306 SPI | 128x64, 7 pines, monocromático   | 1        |
+| Cable USB        | Micro-B                          | 1        |
 
 Librerías (PlatformIO):
 - Adafruit SSD1306
@@ -38,14 +52,17 @@ Librerías (PlatformIO):
 - ArduinoJson
 - WiFi / WiFiClientSecure / HTTPClient (framework Arduino para ESP32)
 
-Conexiones (SPI, comprobadas en pruebas):
-- GND → GND
-- VCC → 3.3V
-- SCL (SCLK) → GPIO 18
-- SDA (MOSI) → GPIO 23
-- RES (Reset) → GPIO 4
-- DC (Data/Command) → GPIO 2
-- CS (Chip Select) → GPIO 5
+## 🔗 Conexiones
+
+| OLED Pin | ESP32 GPIO | Descripción         |
+|----------|------------|--------------------|
+| GND      | GND        | Tierra             |
+| VCC      | 3.3V       | Alimentación       |
+| SCL      | 18         | Clock SPI (SCLK)   |
+| SDA      | 23         | Data SPI (MOSI)    |
+| RES      | 4          | Reset              |
+| DC       | 2          | Data/Command       |
+| CS       | 5          | Chip Select        |
 
 Diagrama rápido de conexiones (ASCII):
 ```
@@ -63,9 +80,9 @@ ESP32 DevKit                           Display OLED SSD1306 (SPI 7 pines)
 
 ---
 
-## Servicios en la nube utilizados
+# ☁️ Servicios en la nube utilizados
 
-- ThingSpeak (canal con 8 campos):
+- **ThingSpeak:** (canal con 8 campos):
   - Field1: uptime_seconds
   - Field2: wifi_rssi (dBm)
   - Field3: free_memory (bytes)
@@ -74,181 +91,168 @@ ESP32 DevKit                           Display OLED SSD1306 (SPI 7 pines)
   - Field6: failed_requests
   - Field7: current_category (0=technology, 1=business, 2=sports, 3=entertainment, 4=health, 5=science, 6=general)
   - Field8: device_status (1=OK, 0=Error)
-- ThingSpeak TalkBack:
+- **ThingSpeak TalkBack:**
   - Cola de comandos remotos (FIFO). Comandos soportados: CATEGORY_*, COUNTRY_*, INTERVAL_*, UPDATE_NOW, STATUS, RESTART.
 
 ---
 
-## APIs externas integradas
+# 🌐 APIs externas integradas
 
-- NewsAPI: [https://newsapi.org/](https://newsapi.org/)
+- **NewsAPI**: [https://newsapi.org/](https://newsapi.org/)
   - Endpoint: /v2/top-headlines
   - Parámetros usados: country, category, pageSize=5, apiKey
   - Ejemplo de request: https://newsapi.org/v2/top-headlines?country=us&category=technology&pageSize=5&apiKey=YOUR_API_KEY
   - Límite plan free: 100 requests/día.
 
-- ThingSpeak Write API (telemetría):
+- **ThingSpeak Write API (telemetría)**:
   - Endpoint: http://api.thingspeak.com/update
   - Parámetros: api_key, field1..field8
   - Rate limit free: mínimo 15s entre updates.
 
-- ThingSpeak TalkBack (comandos):
+- **ThingSpeak TalkBack (comandos)**:
   - Endpoint: http://api.thingspeak.com/talkbacks/{TALKBACK_ID}/commands/execute?api_key={TALKBACK_API_KEY}
   - Respuesta HTTP 200 con comando en texto; 404 si la cola está vacía.
 
 ---
 
-## Instrucciones de instalación paso a paso
+# 🚦 Instrucciones de instalación paso a paso
 
-Prerrequisitos:
-- Visual Studio Code + extensión PlatformIO IDE.
-- Drivers USB del chip de tu ESP32 (CP2102 o CH340).
-- Cuentas en NewsAPI y ThingSpeak (crear canal y TalkBack).
+**Prerrequisitos:**
+- VS Code + PlatformIO
+- Drivers USB ESP32 (CP2102/CH340)
+- Cuentas en NewsAPI, ThingSpeak
 
-1) Clonar y abrir el proyecto
-- Clona el repo en tu equipo y ábrelo con VS Code → PlatformIO carga dependencias la primera vez.
+**Pasos:**
 
-2) Configurar PlatformIO
-- Revisa platformio.ini. Debe incluir lib_deps de Adafruit y ArduinoJson y monitor_speed=115200.
+1. **Clona el repositorio**  
+   ```bash
+   git clone https://github.com/ZundyTor/Dashboard-News-IoT.git
+   cd Dashboard-News-IoT
+   ```
 
-3) Crear config.h a partir de la plantilla
-- Copia include/config.h.example a include/config.h.
-- Completa tus credenciales (WiFi, NewsAPI, ThingSpeak, TalkBack). No subas config.h a GitHub.
+2. **Instala dependencias con PlatformIO**  
+   (Se instalan automáticamente al abrir el proyecto)
 
-4) Cableado y verificación de hardware
-- Conecta el OLED SSD1306 SPI con los pines indicados.
-- Conecta el ESP32 por USB.
+3. **Copia y configura credenciales**  
+   ```bash
+   cp include/config.h.example include/config.h
+   ```
+   Edita `include/config.h` con tus datos (¡no lo subas!).
 
-5) Compilar
-- PlatformIO: Project Tasks → Build. La primera compilación puede tardar.
+4. **Conecta el hardware**  
+   - Cableado según la tabla de conexiones.
 
-6) Subir al ESP32
-- Cierra el Monitor Serial si está abierto.
-- Click Upload. Cuando veas “Connecting…”, mantén presionado BOOT hasta que empiece “Writing…”, luego suelta.
+5. **Compila y sube el código**  
+   - Project Tasks > Upload o `Ctrl+Alt+U`
+   - Mantén presionado BOOT en “Connecting…”
 
-7) Abrir Monitor Serial
-- Velocidad 115200. Verifica conexión WiFi, descarga de noticias y envíos a ThingSpeak.
-
----
-
-## Configuración de credenciales (sin exponer keys)
-
-Archivo: include/config.h (externalizado, ignorado por Git).
-
-Parámetros:
-- WiFi: WIFI_SSID, WIFI_PASSWORD.
-- NewsAPI: NEWS_API_KEY, NEWS_COUNTRY (ej. us), NEWS_CATEGORY (ej. technology).
-- ThingSpeak:
-  - THINGSPEAK_WRITE_API_KEY, THINGSPEAK_READ_API_KEY (opcional para lecturas),
-  - THINGSPEAK_CHANNEL_ID (numérico),
-  - THINGSPEAK_SERVER="api.thingspeak.com".
-- TalkBack:
-  - TALKBACK_ID (numérico), TALKBACK_API_KEY.
-
-Intervalos (ms) recomendados:
-- NEWS_UPDATE_INTERVAL = 60000
-- CLOUD_UPDATE_INTERVAL = 60000
-- COMMAND_CHECK_INTERVAL = 30000
-- DISPLAY_SCROLL_DELAY = 3000
-
-Seguridad:
-- No subas config.h al repo (listado en .gitignore).
-- No compartas API keys en issues/commits/screenshots.
+6. **Abre Monitor Serial**  
+   - Velocidad: 115200  
+   - Verifica logs, display, telemetría y comandos.
 
 ---
 
-## Guía de uso del sistema completo
+# 🔐 Configuración de credenciales
 
-Al iniciar:
-- El ESP32 conecta a WiFi (reintento y barra de progreso en display).
-- Descarga 5 titulares y los muestra rotando cada 3s.
-- Envía telemetría a ThingSpeak cada 60s.
-- Verifica TalkBack cada 30s y ejecuta comandos en cola (uno por ciclo).
+**Archivo:** `include/config.h` *(no se sube, plantilla en `config.h.example`)*
 
-Indicadores en OLED:
-- Header: CATEGORÍA [índice/total] y estado WiFi.
-- Fuente de la noticia.
-- Titular con word wrap (4 líneas).
-- Footer: “Up:hh:mm:ss” + paginación con puntos.
-
-Comandos TalkBack soportados:
-- CATEGORY_TECHNOLOGY, CATEGORY_BUSINESS, CATEGORY_SPORTS, CATEGORY_ENTERTAINMENT, CATEGORY_HEALTH, CATEGORY_SCIENCE, CATEGORY_GENERAL
-- COUNTRY_US, COUNTRY_MX, COUNTRY_CO, COUNTRY_AR, COUNTRY_ES, …
-- INTERVAL_30 … INTERVAL_300 (en segundos)
-- UPDATE_NOW (descargar noticias de inmediato)
-- STATUS (enviar telemetría de inmediato)
-- RESTART (reiniciar ESP32)
-
-Notas:
-- TalkBack usa una cola FIFO: los comandos se consumen y eliminan al ejecutarse.
-- Latencia típica de ejecución: hasta 30s (según COMMAND_CHECK_INTERVAL).
-- Respeta el rate limit de ThingSpeak (≥15s entre updates).
-
----
-
-## Diagrama de arquitectura del sistema
-
-```
-                 Internet
-                    │
-  ┌─────────────────┼───────────────────┐
-  │                 │                   │
-  ▼                 ▼                   ▼
-NewsAPI        ThingSpeak Channel   ThingSpeak TalkBack
-(top-headlines   (Telemetría)         (Comandos remotos)
-  HTTPS GET)        HTTP GET             HTTP GET
-      │                 │                   │
-      └──────────┬──────┴───────┬──────────┘
-                 │              │
-                 ▼              ▼
-            ESP32 (WiFi)  ←→  OLED SSD1306 (SPI)
-            main.cpp
-            - WiFi manager
-            - NewsAPI client (HTTPS)
-            - ThingSpeak client (HTTP)
-            - TalkBack handler
-            - Display controller
-            - JSON parser
-            - Error handling
-            - Stats tracking
+```cpp
+const char* WIFI_SSID = "TU_WIFI";
+const char* WIFI_PASSWORD = "TU_PASSWORD";
+const char* NEWS_API_KEY = "TU_API_KEY_NEWSAPI";
+const char* THINGSPEAK_WRITE_API_KEY = "TU_KEY";
+const unsigned long THINGSPEAK_CHANNEL_ID = 123456;
+const unsigned long TALKBACK_ID = 654321;
+const char* TALKBACK_API_KEY = "TU_TALKBACK_KEY";
 ```
 
----
+**Intervalos recomendados (ms):**
+- `NEWS_UPDATE_INTERVAL = 60000`
+- `CLOUD_UPDATE_INTERVAL = 60000`
+- `COMMAND_CHECK_INTERVAL = 30000`
+- `DISPLAY_SCROLL_DELAY = 3000`
 
-## Problemas encontrados y soluciones
-
-1) Display no mostraba nada pese a “OK” en serial
-- Causa: código inicial era para I2C, pero el display es SPI (7 pines).
-- Solución: usar constructor SPI de Adafruit_SSD1306 y mapear pines: MOSI=23, CLK=18, DC=2, CS=5, RESET=4.
-
-2) NewsAPI devolvía 200 con payload muy pequeño y 0 artículos (co + technology)
-- Causa: combinación país/categoría sin resultados.
-- Solución: usar us + technology (o mx + general, u otras combinaciones más pobladas).
-
-3) ThingSpeak respondía “0”
-- Causa: rate limit (<15s entre updates) o canal mal configurado.
-- Solución: esperar ≥20s antes de nuevo update, confirmar Fields habilitados y Write API Key correcta.
-
-4) Error al subir “Failed to connect to ESP32”
-- Causa: modo bootloader no activado automáticamente.
-- Solución: presionar BOOT durante “Connecting…”, soltar al iniciar “Writing…”. Cerrar Monitor Serial y verificar puerto.
-
-5) Conflicto Git al subir al repo (“fetch first”)
-- Causa: el remoto ya tenía commits (README/License inicial).
-- Solución: git pull origin main --allow-unrelated-histories y luego git push.
+⚠️ **Nunca subas tus claves reales.**
 
 ---
 
-## Mejoras futuras identificadas
+# 🕹️ Guía de uso del sistema completo
 
-- UI del display: scroll horizontal suave para titulares largos y soporte multilenguaje.
-- Cache local y deduplicación de noticias para ahorrar Requests.
-- OTA (Over-The-Air) para actualizar firmware sin cable.
-- TLS robusto con verificación de certificados (evitar setInsecure).
-- Backend propio opcional (AWS/Firebase) para analítica avanzada y control granular.
-- Modo ahorro de energía y deep sleep (si se alimenta por batería).
-- Web dashboard estático (Vercel/Netlify) con visualización y emisión de comandos.
-- Selección de fuentes/sources y filtros por palabra clave.
+**Flujo:**
+1. Conexión WiFi (display: progreso)
+2. Descarga de noticias (NewsAPI)
+3. Muestra titulares (rotación cada 3s)
+4. Envío de telemetría a ThingSpeak cada 60s
+5. Verificación de comandos remotos (TalkBack cada 30s)
+6. Ejecución automática de comandos (cambio de categoría, país, intervalo, update, restart)
+
+**Display:**
+```
+┌────────────┬─────────┬─────────────┐
+│ CATEGORY   │ [n/N]   │ WiFi Status │
+├────────────┴─────────┴─────────────┤
+│ Fuente de noticia                  │
+│ Titular (4 líneas, word wrap)      │
+├────────────────────────────────────┤
+│ Up:hh:mm:ss   ● ○ ○ ○              │
+└────────────────────────────────────┘
+```
+
+**Comandos remotos soportados:**
+- `CATEGORY_TECHNOLOGY`, `CATEGORY_BUSINESS`, ...
+- `COUNTRY_US`, `COUNTRY_MX`, ...
+- `INTERVAL_30`...`INTERVAL_300`
+- `UPDATE_NOW`
+- `STATUS`
+- `RESTART`
+
+**Uso TalkBack:**
+- Agrega el comando en ThingSpeak → Apps → TalkBack
+- El ESP32 lo ejecuta en ≤30s
+
+---
+
+# 🧩 Diagrama de arquitectura del sistema
+
+```
+      Internet
+         │
+ ┌───────┼───────┐
+ │       │       │
+ ▼       ▼       ▼
+NewsAPI  ThingSpeak  ThingSpeak TalkBack
+│        │         │
+│        │         │
+└───┬────┴─────┬───┘
+    │          │
+    ▼          ▼
+   ESP32 ←→ OLED SSD1306
+     │
+     ▼
+ Serial Monitor / USB
+```
+
+---
+
+# 🐞 Problemas encontrados y soluciones
+
+- **Display en blanco**: Inicialmente era por código I2C, se corrigió usando SPI y pines correctos.
+- **NewsAPI sin noticias**: Algunas combinaciones país/categoría no devuelven titulares, usar combinaciones populares (ej: us + technology).
+- **ThingSpeak responde “0”**: Límite mínimo de 15s entre updates; esperar y verificar fields/API key.
+- **Error de subida ESP32**: Usar botón BOOT durante “Connecting…”, cerrar Monitor Serial y revisar puerto.
+- **Conflicto Git push**: Usar `git pull origin main --allow-unrelated-histories` antes de push.
+
+---
+
+# 🚀 Mejoras futuras identificadas
+
+- Scroll horizontal suave en display para titulares largos.
+- Cache local de noticias y deduplicación.
+- OTA (actualización por WiFi).
+- TLS robusto (verificación de certificados).
+- Dashboard web propio con analítica avanzada.
+- Selección de fuentes y filtros por palabra clave.
+- Modo ahorro de energía/deep sleep.
 
 ---
 
@@ -257,3 +261,9 @@ NewsAPI        ThingSpeak Channel   ThingSpeak TalkBack
 - Respeta los límites de NewsAPI (100 req/día) y ThingSpeak (≥15s entre updates).
 - Ajusta intervalos en config.h para desarrollo (más rápidos) o producción (más conservadores).
 - TalkBack es una cola: agrega comandos cuando desees ejecutar acciones y espera el ciclo de verificación.
+
+---
+
+**Desarrollado por Sebastián Blanco y Daniel Lerzundy**
+
+---
