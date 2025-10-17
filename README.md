@@ -16,8 +16,6 @@ Sistema IoT que integra un ESP32 con display OLED SSD1306 (SPI), consumo de APIs
 - [🧩 Diagrama de arquitectura del sistema](#-diagrama-de-arquitectura-del-sistema)
 - [🐞 Problemas encontrados y soluciones](#-problemas-encontrados-y-soluciones)
 - [🚀 Mejoras futuras identificadas](#-mejoras-futuras-identificadas)
-- [⚙️ Elementos Técnicos Obligatorios](#️-elementos-técnicos-obligatorios)
-- [📦 Estructura recomendada del repositorio](#-estructura-recomendada-del-repositorio)
 
 ---
 
